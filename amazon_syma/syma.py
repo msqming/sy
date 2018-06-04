@@ -63,7 +63,9 @@ def parse_index(html,browser):
         result = {
             'asin':asin,
             'comm_title':comm_title,
-            'deal_url':deal_url
+            'deal_url':deal_url,
+            # 'site': 'uk'
+            'site': 'de'
         }
         data.append(result)
 
@@ -94,18 +96,21 @@ def parse_deal(deal_html,item):
         # best_rank = re.search('Best Sellers Rank(.*?)100\)', best_rank, re.S)
         best_rank = re.search('Amazon Bestseller-Rang(.*?)100\)', best_rank, re.S)
         if best_rank:
-            best_rank = best_rank.group(1).replace(',', '')
+            best_rank = best_rank.group(1).replace(',', '').strip()
         else:
             best_rank = 'none'
 
-    print(item['asin'],best_rank)
-    print()
+    # print(item['asin'],best_rank)
+    # print(item['comm_title'])
+    # print()
+    item['best_rank'] = best_rank
+    item['spider_time'] = time.strftime('%Y%m%d')
+    return item
 
 
 def conn_mysql():
     # 创建连接
-    conn = pymysql.connect(host='119.23.52.82', port=3306, user='root', passwd='root123.com', db='amazonshakers',
-                           charset='utf8')
+    conn = pymysql.connect(host='119.23.52.82', port=3306, user='root', passwd='root123.com', db='syma',charset='utf8')
 
     return conn
 
@@ -116,15 +121,12 @@ def save_to_mysql(conn,result):
 
     # 一次性插入多条数据
     try:
-        cursor.execute('insert into toyshakers(asin,reviews,price,score,percent,seller_num,sold_by,sales_rank,ranknumber,spider_time,deal_url,comm_title) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
-                           (result['asin'],result['reviews'],
-                            result['price'], result['score'],
-                            result['percent'], result['seller_num'],
-                            result['sold_by'],result['sales_rank'],
-                            result['ranknumber'],result['spider_time'],
-                            result['deal_url'],result['comm_title']
+        cursor.execute('insert into dodoph(asin,site,comm_title,best_rank,spider_time) values(%s,%s,%s,%s,%s)',
+                           (result['asin'],result['site'],
+                            result['comm_title'],
+                            result['best_rank'],result['spider_time'],
                             ))
-        print(result['ranknumber'],result['asin'],'存储成功')
+        print(result['asin'],'存储成功')
     except Exception as e:
         print(result['asin'], '存储失败')
         print(e)
@@ -146,7 +148,10 @@ def main():
         for item in data:
             deal_html = get_deal(item)
             if deal_html:
-                parse_deal(deal_html,item)
+                result = parse_deal(deal_html,item)
+                conn = conn_mysql()
+                if conn:
+                    save_to_mysql(conn,result)
             time.sleep(3)
 
 
