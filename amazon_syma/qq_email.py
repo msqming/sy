@@ -9,7 +9,7 @@ my_pass = 'bihhclfyyqcrbeab'  # 发件人邮箱密码(当时申请smtp给的口�
 
 
 def read_content(email):
-    with open('20180604.txt','r',encoding='utf-8') as f:
+    with open('20180609.txt','r',encoding='utf-8') as f:
     # with open('b.txt','r',encoding='utf-8') as f:
         content = f.read()
         ret = mail(content,email)

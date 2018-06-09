@@ -39,13 +39,13 @@ def get_index():
     start_url2 = 'https://www.amazon.de/s?marketplaceID=A1PA6795UKMFR9&me=A14DB0COW8CC7&merchant=A14DB0COW8CC7&redirect=true'
 
 
-    for start_url in [start_url2]:
+    for start_url in [start_url1]:
         browser = webdriver.Chrome()
         browser.get(start_url)
 
         browser.execute_script('window.scrollTo(0, document.body.scrollHeight)')
 
-        time.sleep(3)
+        time.sleep(1)
 
         return browser.page_source,browser
 
@@ -64,8 +64,8 @@ def parse_index(html,browser):
             'asin':asin,
             'comm_title':comm_title,
             'deal_url':deal_url,
-            # 'site': 'uk'
-            'site': 'de'
+            'site': 'uk'
+            # 'site': 'de'
         }
         data.append(result)
 
@@ -91,10 +91,10 @@ def parse_deal(deal_html,item):
     doc = pq(deal_html)
     # 排名
     # prodDetails column.col2
-    best_rank = doc('#prodDetails div.column.col2 ').text()
+    best_rank = doc('#prodDetails div.column.col2').text()
     if best_rank:
-        # best_rank = re.search('Best Sellers Rank(.*?)100\)', best_rank, re.S)
-        best_rank = re.search('Amazon Bestseller-Rang(.*?)100\)', best_rank, re.S)
+        best_rank = re.search('Best Sellers Rank(.*?)100\)', best_rank, re.S)
+        # best_rank = re.search('Amazon Bestseller-Rang(.*?)100\)', best_rank, re.S)
         if best_rank:
             best_rank = best_rank.group(1).replace(',', '').strip()
         else:
